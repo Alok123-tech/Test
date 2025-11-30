@@ -9,11 +9,13 @@ tools {
             steps {
                 echo 'Checking out code from GitHub...'
                 git branch: 'master', url: 'https://github.com/Alok123-tech/Test.git'
+                dir('opencart_cucumber_framework')
             }
         }
 
         stage('Build') {
             steps {
+                dir('opencart_cucumber_framework')
                 echo 'Building the project...'
                 bat 'mvn -B clean compile'
             }
@@ -21,6 +23,7 @@ tools {
 
         stage('Test') {
             steps {
+                dir('opencart_cucumber_framework')
                 echo 'Running tests...'
                 bat 'mvn -B test'
             }
