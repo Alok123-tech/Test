@@ -2,35 +2,33 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
-                // Check out the same repository that contains this Jenkinsfile
-                checkout scm
+                echo 'Checking out code from GitHub...'
+                git branch: 'main', url: 'https://github.com/Alok123-tech/Test.git'
             }
         }
 
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                // Windows agents: use bat. On Linux, change to: sh 'mvn -B clean compile'
                 bat 'mvn -B clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running Cucumber tests via Maven (mvn test)...'
+                echo 'Running tests...'
                 bat 'mvn -B test'
             }
         }
 
         stage('Archive Reports') {
             steps {
-                // JUnit XML results from Surefire (if present)
+                echo 'Archiving reports...'
                 junit 'target/surefire-reports/*.xml'
-
-                // Archive framework HTML/JSON reports and screenshots
-                archiveArtifacts artifacts: 'reports/**, screenshot/**', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'reports/**, target/cucumber-reports/**, screenshot/**', allowEmptyArchive: true
             }
         }
     }
@@ -38,6 +36,12 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished'
+        }
+        success {
+            echo 'Build succeeded!'
+        }
+        failure {
+            echo 'Build failed. Check console output.'
         }
     }
 }
