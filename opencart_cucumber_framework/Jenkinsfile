@@ -1,52 +1,41 @@
 pipeline {
     agent any
-tools {
-    maven 'Maven'
-}
-    stages {
 
+    tools {
+        maven 'Maven'    // Jenkins Maven installation name
+        jdk 'jdk17'      // Jenkins JDK installation name
+    }
+
+    stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out code from GitHub...'
-                git branch: 'master', url: 'https://github.com/Alok123-tech/Test.git'
-                dir('opencart_cucumber_framework')
+                echo "Checking out code from GitHub..."
+                git url: 'https://github.com/Alok123-tech/Test.git', branch: 'master'
             }
         }
 
         stage('Build') {
             steps {
-                dir('opencart_cucumber_framework')
-                echo 'Building the project...'
-                bat 'mvn -B clean compile'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                dir('opencart_cucumber_framework')
-                echo 'Running tests...'
-                bat 'mvn -B test'
+                dir('Test/opencart_cucumber_framework') {
+                    echo "Running Maven Build..."
+                    sh 'mvn clean test'
+                }
             }
         }
 
         stage('Archive Reports') {
             steps {
-                echo 'Archiving reports...'
-                junit 'target/surefire-reports/*.xml'
-                archiveArtifacts artifacts: 'reports/**, target/cucumber-reports/**, screenshot/**', allowEmptyArchive: true
+                dir('Test/opencart_cucumber_framework') {
+                    junit '**/target/surefire-reports/*.xml'
+                    publishHTML([allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/cucumber-html-reports',
+                        reportFiles: 'overview-features.html',
+                        reportName: 'Cucumber HTML Report'
+                    ])
+                }
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline finished'
-        }
-        success {
-            echo 'Build succeeded!'
-        }
-        failure {
-            echo 'Build failed. Check console output.'
         }
     }
 }
