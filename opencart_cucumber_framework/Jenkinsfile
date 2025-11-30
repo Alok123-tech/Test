@@ -18,7 +18,7 @@ pipeline {
             steps {
                 dir('opencart_cucumber_framework') {
                     echo "Running Maven Build..."
-                    sh 'mvn clean test'
+                     bat 'mvn clean test'
                 }
             }
         }
